@@ -155,7 +155,9 @@ session = Session()
 ## Get all historical prices for symbols available
 ##################################################
 
-def getasave_tocsv(ticker,dirout='./rawdata/'):
+def getasave_tocsv(ticker,dirout='./rawdata/YHOOFHISTP/'):
+    if not os.path.exists(dirout):
+        os.makedirs(dirout)
     data = get_histPcsv(ticker)
     with open(dirout+ticker+'_YHOOF_HISTP'+'.csv', "wb") as f:
         writer = csv.writer(f)
@@ -168,7 +170,7 @@ def buildallYHOOHISTP_1st():
     buildallYHOOHISTP_1st builds the SQL database of all Yahoo! Finance Historical Prices 
     for the first time (i.e. run this the first time)
     """
-    subdir = './rawdata'
+    subdir = './rawdata/YHOOFHISTP/'
 
     targetlst = session.query(Symbole).all()
     start0 = time.clock()
@@ -201,6 +203,7 @@ def buildallYHOOHISTP_1st():
         session.add_all(output)
     end1 = time.clock()
     print "Adding into SQL database took this long: ", (end1 - start1)/1000
+    print "\n Do session.commit() to commit these changes to the SQL database \n"
     return 0 
 
 
