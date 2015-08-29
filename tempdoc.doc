@@ -1,0 +1,76 @@
+## tempdoc.doc
+## tempdoc.doc temporary documentation for marche package
+##  
+############################################################################ 
+## Copyleft 2015, Ernest Yeung <ernestyalumni@gmail.com>                            
+##                                                            
+## 20150805
+##                                                                               
+## This program, along with all its code, is free software; you can redistribute 
+## it and/or modify it under the terms of the GNU General Public License as 
+## published by the Free Software Foundation; either version 2 of the License, or   
+## (at your option) any later version.                                        
+##     
+## This program is distributed in the hope that it will be useful,               
+## but WITHOUT ANY WARRANTY; without even the implied warranty of              
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the                 
+## GNU General Public License for more details.                             
+##                                                                          
+## You can have received a copy of the GNU General Public License             
+## along with this program; if not, write to the Free Software Foundation, Inc.,  
+## S1 Franklin Street, Fifth Floor, Boston, MA                      
+## 02110-1301, USA                                                             
+##                                                                  
+## Governing the ethics of using this program, I default to the Caltech Honor Code: 
+## ``No member of the Caltech community shall take unfair advantage of        
+## any other member of the Caltech community.''                               
+##                                                         
+## Donate, and support my other scientific and engineering endeavors at 
+## ernestyalumni.tilt.com                                                      
+##                          
+## Facebook     : ernestyalumni                                                   
+## linkedin     : ernestyalumni                                                    
+## Tilt/Open    : ernestyalumni                                                    
+## twitter      : ernestyalumni                                                   
+## youtube      : ernestyalumni                                                   
+## wordpress    : ernestyalumni                                                    
+##                                                                                  
+############################################################################ 
+
+Start here with
+firms_by_NASDAQ.py
+
+If you’re building the SQL database of all the present firms (i.e. symbols, tickers, stocks) that are listed by the NASDAQ website for NASDAQ, AMEX, and NYSE, then do this:
+
+-Go edit the Python script firms_by_NASDAQ.py and replace the string “iamauser” with the username you want to use for your SQL database.
+-Be sure to configure the SQLAlchemy engine with your choice of SQL database.  For instance, I use postgresql, so I used “postgresql://“ in create_engine.  Also, it’s located in a localhost for the postgreSQL database named ‘marche’, i.e. first, I created, with createdb the PostgreSQL database marche.  Then, I have to “call it” with the SQLAlchemy engine.  
+
+python firms_by_NASDAQ.py
+
+in its directory.  
+
+
+apres_firms_by_NASDAQ.py
+
+The available SQLalchemy classes that map to tables are the following:
+securityNASDAQ
+securityAMEX
+securityNYSE
+security
+Symbole
+
+securityNASDAQ - information on a security (i.e. firm, stock, company) listed solely on NASDAQ
+securityAMEX - information on a security (i.e. firm, stock, company) listed solely on AMEX
+securityNYSE - information on a security (i.e. firm, stock, company) listed solely on NYSE
+security - information on a security (i.e. firm, stock, company) listed in all 3, NASDAQ, AMEX, NYSE, that is sourced from the NASDAQ website
+Symbole - this class maps to a table that only contains unique ticker symbols
+
+
+YHOOF_toSQL.py
+
+Recall that 
+
+session.query(Symbole).all()
+
+gets all the (ticker) symbols, with no duplicates, as a Python list.  
+
