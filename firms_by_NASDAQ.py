@@ -42,16 +42,16 @@ import csv
 from urlparse import urlparse, parse_qs
 import requests
 import sqlalchemy
-from sqlalchemy import create_engine, Column, Integer, Numeric, String
+from sqlalchemy import create_engine, Column, Integer, Numeric, String, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, relationship, backref
 
 import collections
 
 
 iamauser = raw_input("Input your username: ")
 if iamauser == "":
-    iamauser = ""
+    iamauser = "ernestyeung"
 password = raw_input("Input your password: ")
 
 engine = create_engine("postgresql://"+iamauser+":"+password+"@localhost/marche")
@@ -68,7 +68,7 @@ trial_filenames = [ filename_prefix+parse_qs(urlparse(trial_urls[0]).query)['exc
                     filename_prefix+parse_qs(urlparse(trial_urls[1]).query)['exchange'][0]+'.csv',
                     filename_prefix+parse_qs(urlparse(trial_urls[2]).query)['exchange'][0]+'.csv' ]
 
-def get_co_csv(url, filename_prefix):
+def get_co_csv(url):
     
     with open(filename_prefix+parse_qs(urlparse(url).query)['exchange'][0]+'.csv',"wb") as f:  # e.g. NASDAQ
         r = requests.get(url)
@@ -100,10 +100,22 @@ def check_same_ticker(your_list):
     a = [row[0] for row in your_list ]
     return [item for item, count in collections.Counter(a).items() if count > 1]
 
-
 ########################################
 ## SQLAlchemy db 
 ########################################
+
+##########
+## EY : 20150805 I've tried dict.copy to try to construct columns from a single dictionary, but once a class is constructed, the Columns of sqlalchemy inherits the table it belongs to immediately from that first table, and propagates to all related dictionaries; I haven't tried deepcopy, i.e. cols = deepcopy(colsNYSE) then change the tablename, cols['__tablename__'] = 'othercol'
+##########
+Base = declarative_base()
+
+class Symbole(Base):
+    __tablename__ = 'symbole_table'
+    id = Column("uid",Integer,primary_key=True)
+    symbole = Column("symbole",String, unique=True)
+    def __repr__(self):
+        return str( self.symbole )
+
 
 colsNASDAQ = {
     '__tablename__': 'NASDAQbynasdaq',
@@ -147,7 +159,7 @@ colsNYSE = {
 colsSec = {
     '__tablename__': 'securitiesbynasdaq',
     'id'           : Column('id', Integer, primary_key=True),
-    'Symbol'       : Column('Symbol', String),   
+    'Symbol'       : Column('Symbol', String,ForeignKey(Symbole.symbole)),   
     'Name'         : Column('Name', String),  
     'LastSale'     : Column('LastSale', String),
     'MarketCap'    : Column('MarketCap', String),
@@ -155,17 +167,13 @@ colsSec = {
     'Sector'       : Column('Sector', String),
     'industry'     : Column('industry', String),
     'SummaryQuote' : Column('SummaryQuote', String),
-    'Market'       : Column('Market', String)
+    'Market'       : Column('Market', String),
+    'symbole'      : relationship("Symbole")                        
     }
 
-##########
-## EY : 20150805 I've tried dict.copy to try to construct columns from a single dictionary, but once a class is constructed, the Columns of sqlalchemy inherits the table it belongs to immediately from that first table, and propagates to all related dictionaries; I haven't tried deepcopy, i.e. cols = deepcopy(colsNYSE) then change the tablename, cols['__tablename__'] = 'othercol'
-##########
 
 def co_repr(self):
     return "<Security listing(Symbol='%s', Name='%s', LastSale='%s', MarketCap='%s', IPOyear='%s', Sector='%s', industry='%s', Summary='%s'>" % (self.Symbol, self.Name, self.LastSale, self.MarketCap, self.IPOyear, self.Sector, self.industry, self.SummaryQuote) 
-
-Base = declarative_base()
 
 def Row(clsname,base,dict):
     Row=type(str(clsname),(base,),dict)
@@ -192,8 +200,15 @@ setattr(security      , '__repr__', co_repr)
 # Is the server running on host "localhost" (127.0.0.1) and accepting
 # TCP/IP connections on port 5432?
 #####
-Base.metadata.create_all(engine)
 
+###################################################################
+## EY : 20150813
+## In retrospect, I realized that Symbol isn't a unique column i.e. 
+## doesn't have a unique constraint; I will need to make an adhoc symbol table that is unique
+## and can be linked to others through ForeignKey relations
+###################################################################
+
+Base.metadata.create_all(engine)
 
 Session = sessionmaker(bind=engine)
 session = Session()
@@ -214,7 +229,7 @@ def toSQLfromcsv(filename,Row,market="NASDAQ"):
 
     toNASDAQ = toSQLfromcsv( trial_filenames[0] , securityNASDAQ )
     toAMEX   = toSQLfromcsv( trial_filenames[1] , securityAMEX, "AMEX" )
-    toNYSE   = toSQLfromcsv( trial_filenames[2] , securityAMEX, "NYSE" )
+    toNYSE   = toSQLfromcsv( trial_filenames[2] , securityNYSE, "NYSE" )
 
     session.add_all( toNASDAQ )
     session.add_all( toAMEX )
@@ -237,4 +252,62 @@ for file in trial_filenames:
     output += output1
     
 """ 
+###################################################################
+## EY : 20150813
+## In retrospect, I realized that Symbol isn't a unique column i.e. 
+## doesn't have a unique constraint; I will need to make an adhoc symbol table that is unique
+## and can be linked to others through ForeignKey relations
+###################################################################
 
+symlst = [row.Symbol for row in session.query(security).all()]
+symset = set(symlst) # eliminate duplicate symbols
+
+
+def toSQLfromSymbolelst(lst):
+    """
+    Example of usage:
+    outputsyms = toSQLfromSymbolelst( list(symset))
+    session.add_all(outputsyms)
+    session.commit()
+    session.close()
+    """
+    output = []
+    for symbol in lst:
+        output.append( Symbole(symbole=symbol) )
+    return output
+
+
+def build1st(urllst = trial_urls):
+    for url in urllst:
+        get_co_csv(url)
+
+    
+    toNASDAQ = toSQLfromcsv( trial_filenames[0] , securityNASDAQ )
+    toAMEX   = toSQLfromcsv( trial_filenames[1] , securityAMEX, "AMEX" )
+    toNYSE   = toSQLfromcsv( trial_filenames[2] , securityNYSE, "NYSE" )
+
+    output = []
+    for file in trial_filenames:
+        output1 = toSQLfromcsv(file, security, file[11:].split('.')[0])
+        output += output1
+
+    session.add_all( toNASDAQ )
+    session.add_all( toAMEX )
+    session.add_all( toNYSE )
+    session.commit()
+
+    outputsyms = toSQLfromSymbolelst( list(set([ticker.Symbol for ticker in output])))
+    session.add_all(outputsyms)
+    session.commit()
+
+    session.add_all(output)
+    session.commit()
+    session.close()
+    
+    return toNASDAQ, toAMEX, toNYSE, output#, symset
+
+
+if __name__ == "__main__":
+    choice = raw_input("Do you want to build the SQL database of firms, according to NASDAQ, for the first time? Type 'yes' if yes, without the quotation marks.  Type any other key, otherwise: ")
+    if choice == 'yes':
+        build1st()
