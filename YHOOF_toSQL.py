@@ -54,6 +54,7 @@ import csv
 import os
 import urllib2
 import time # to time functions, seeing how long it takes to download all historical prices
+import httplib
 
 def ColumnDate(date):
     if date != 'N/A' and date != 'NULL':
@@ -164,6 +165,32 @@ def getasave_tocsv(ticker,dirout='./rawdata/YHOOFHISTP/'):
         writer.writerows(data)
     return data
 
+def toSQL_fromcsv():
+    subdir = './rawdata/YHOOFHISTP/'
+    savedlst = os.listdir(subdir)
+    savedlst = [ fname for fname in savedlst if fname.find('.csv')>=0] # to get rid of '.DS_Store' file
+    start1 = time.clock()
+    for fname in savedlst:
+        print "Opening : %s" % fname
+        ticker = fname.split('_')[0]
+        f = open( subdir+fname,'rb')
+        reader = csv.reader(f)
+        data = list(reader)
+        headers = data[0]
+        del data[0]
+        data = [YHOOF_DayQuote(headers,row) for row in data] # preprocess row or list of strings into appropriate types, like Decimal and dates
+        data = [row+[ticker,] for row in data]
+        
+        headers = [header.replace(' ','') for header in headers]
+        output = []
+        for row in data:
+            output.append( YHOOF_HISTP_datapt(Symbol=ticker,**dict(zip(headers,row))) )
+        session.add_all(output)
+    end1 = time.clock()
+    print "Adding into SQL database took this long: ", (end1 - start1)/1000
+    print "\n Do session.commit() to commit these changes to the SQL database \n"
+    return 0
+
 def buildallYHOOHISTP_1st():
     """
     buildallYHOOHISTP_1st = buildallYHOOHISTP_1st()
@@ -176,34 +203,18 @@ def buildallYHOOHISTP_1st():
     start0 = time.clock()
     for ticker in targetlst:
         try:
-            getasave_tocsv(ticker)
-            print "%s obtained" % ticker
+            getasave_tocsv(ticker.symbole)
+            print "%s obtained" % ticker.symbole
         except urllib2.HTTPError:
-            print "Not here: %s" % ticker
+            print "Not here: %s" % ticker.symbole
+        except httplib.IncompleteRead as e:
+            print "Incomplete Read (???): %s" % ticker.symbole
     end0 = time.clock()
     print "Downloading took this long: ", (end0-start0)/1000.
 
-    savedlst = os.listdir(subdir)
-    start1 = time.clock()
-    for fname in savedlst:
-        print "Opening : %s" % fname
-        ticker = fname.split('_')[0]
-        f = open( subdir+fname,'rb')
-        reader = csv.reader(f)
-        data = list(reader)
-        headers = data[0]
-        del data[0]
-        data = [YHOOF_DayQuote(headers,row) for row in data]
-        data = [row+[symbol,] for row in data]
-        
-        headers = [header.replace(' ','') for header in headers]
-        output = []
-        for row in data:
-            output.append( YHOOF_HISTP_datapt(Symbol=ticker,**dict(zip(headers,row))) )
-        session.add_all(output)
-    end1 = time.clock()
-    print "Adding into SQL database took this long: ", (end1 - start1)/1000
-    print "\n Do session.commit() to commit these changes to the SQL database \n"
+    toSQL_fromcsv()
+    session.commit()
+    session.close()
     return 0 
 
 
