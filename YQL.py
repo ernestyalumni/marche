@@ -124,6 +124,16 @@ def get_histPcsv(symbol, startdate ='', enddate=''):
     if (startdate == '' and enddate == ''):
         HistPurl.qs = {'s': symbol }
         HistPurl.mkquery()
+    else:
+        qdict = {'s':symbol}
+        qstartdate = dict(zip(['c','a','b'],startdate.split('-')))
+        qstartdate['a'] = '0'+str(int(qstartdate['a'])-1)
+        qenddate   = dict(zip(['f','d','e'],enddate.split('-')))
+        qenddate['d'] = '0'+str(int(qenddate['d'])-1)
+        qdict.update(qstartdate)
+        qdict.update(qenddate)
+        HistPurl.qs = qdict                        
+        HistPurl.mkquery()
 
     f = urlopen( HistPurl.urlout()  )
     data = [ row for row in csv.reader(f) ]
