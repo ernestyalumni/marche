@@ -56,6 +56,8 @@ in its directory.
 
 ###apres_firms_by_NASDAQ.py###
 
+Once you have set up the SQL database of security, firm, stock, or company (basic) information from NASDAQ, you'd want to do that once and set it aside.  *apres_firms_by_NASDAQ.py* is dedicated to using SQLAlchemy to do session queries of these tables involving only a security's basic information.  
+
 The available SQLalchemy classes that map to tables are the following:
 
 * securityNASDAQ
