@@ -5,6 +5,12 @@ This is copied off of tempdoc.doc, but with (slightly) better formatting:
 
 ##Quick Start: ##
 ###Build: ###
+
+- Go edit *firms_by_NASDAQ.py* and replace the string “iamauser” with the username you want to use for your SQL database.
+- Be sure to configure the SQLAlchemy engine with your choice of SQL database in *firms_by_NASDAQ.py*
+
+Then run the following in their directories:
+
 ```  
   python -i firms_by_NASDAQ.py
   python -i YHOOF_toSQL.py 
