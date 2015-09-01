@@ -126,10 +126,6 @@ class YHOOF_HISTP_datapt(Base):
     def __repr__(self):
         return "<Time-series data(id='%s', Symbol='%s', Date='%s', Open='%s', High='%s', Low='%s', Close='%s', Volume='%s', AdjClose='%s'>" % (self.id, self.Symbol, self.Date, self.Open, self.High, self.Low, self.Close, self.Volume, self.AdjClose)
 
-
-Base.metadata.create_all(engine)
-
-
 def insc_Symbol_toSQL(symbol):    # inscrire
     """
     insc_Symbol_toSQL = insc_Symbol_toSQL(symbol)
@@ -141,6 +137,22 @@ def insc_Symbol_toSQL(symbol):    # inscrire
         output.append( YHOOF_HISTP_datapt(Symbol=symbol, **dict(zip(headers,row))) )
     return output
 
+def insc_SymbHP_daterange(ticker,startdate,enddate):
+    data = get_histPcsv(ticker,startdate,enddate)
+    print "%s obtained" % ticker
+    del data[-1]
+    headers = data[0]
+    del data[0]
+    data = [YHOOF_DayQuote(headers,row) for row in data ] 
+    data = [row + [ticker,] for row in data ]
+    output = []
+    headers = [header.replace(' ','') for header in headers] # we have to make sure 'Adj Close' column is called 'AdjClose' for SQLAlchemy
+    for row in data:
+        output.append(YHOOF_HISTP_datapt(Symbol=ticker, **dict(zip(headers,row))) )
+    return output
+
+
+Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine)
 session = Session()
 
@@ -186,9 +198,10 @@ def toSQL_fromcsv():
         for row in data:
             output.append( YHOOF_HISTP_datapt(Symbol=ticker,**dict(zip(headers,row))) )
         session.add_all(output)
+        session.commit()
     end1 = time.clock()
     print "Adding into SQL database took this long: ", (end1 - start1)/1000
-    print "\n Do session.commit() to commit these changes to the SQL database \n"
+#    print "\n Do session.commit() to commit these changes to the SQL database \n"
     return 0
 
 def buildallYHOOHISTP_1st():
