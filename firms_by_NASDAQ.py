@@ -51,7 +51,7 @@ import collections
 
 iamauser = raw_input("Input your username: ")
 if iamauser == "":
-    iamauser = ""
+    iamauser = "username"
 password = raw_input("Input your password: ")
 
 engine = create_engine("postgresql://"+iamauser+":"+password+"@localhost/marche")
