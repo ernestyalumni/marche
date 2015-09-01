@@ -34,6 +34,10 @@ with
 * Symbole - a SQLalchemy class mapper to table “symbole_table” which is a table of only ticker symbols (it’s fast to query this table if you only want ticker symbols)
 * YHOOF_HISTP_datapt as YfHP_pt - all historical prices for all possible securities, firms, stocks, or companies listed in the NYSE, AMEX, or NASDAQ
 
+##Features##
+
+- Get ALL Historical prices for all possible securities, firms, stocks, or companies listed in the NYSE, AMEX, or NASDAQ, when available, and place into a SQL database
+- Use SQLAlchemy to query the SQL database and be able to plot data columns of Open, Low, High, Close, Adjusted Close against the time (i.e. date)
 
 ##Start here with##
 ###firms_by_NASDAQ.py###
