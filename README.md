@@ -6,7 +6,7 @@ This is copied off of tempdoc.doc, but with (slightly) better formatting:
 ##Quick Start: ##
 ###Build: ###
 ```  
-python -i firms_by_NASDAQ.py
+  python -i firms_by_NASDAQ.py
   python -i YHOOF_toSQL.py 
   ```
 
