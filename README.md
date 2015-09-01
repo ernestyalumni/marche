@@ -54,6 +54,8 @@ The available SQLalchemy classes that map to tables are the following:
 * security
 * Symbole
 
+where
+
 * securityNASDAQ - information on a security (i.e. firm, stock, company) listed solely on NASDAQ
 * securityAMEX - information on a security (i.e. firm, stock, company) listed solely on AMEX
 * securityNYSE - information on a security (i.e. firm, stock, company) listed solely on NYSE
