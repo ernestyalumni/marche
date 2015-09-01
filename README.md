@@ -5,11 +5,16 @@ This is copied off of tempdoc.doc, but with (slightly) better formatting:
 
 ##Quick Start: ##
 ###Build: ###
-```  python -i firms_by_NASDAQ.py
-  python -i YHOOF_toSQL.py ```
+```  
+python -i firms_by_NASDAQ.py
+  python -i YHOOF_toSQL.py 
+  ```
 
 Then, after every trading day, update the table of Historical Prices by running the following:
-```  python -i apres_YHOOFhp.py```
+
+```  
+python -i apres_YHOOFhp.py
+```
 
 Then use the following SQL table-mapper classes to make SQLAlchemy session queries:
 *security
@@ -30,7 +35,9 @@ If you’re building the SQL database of all the present firms (i.e. symbols, ti
 -Go edit the Python script firms_by_NASDAQ.py and replace the string “iamauser” with the username you want to use for your SQL database.
 -Be sure to configure the SQLAlchemy engine with your choice of SQL database.  For instance, I use postgresql, so I used “postgresql://“ in create_engine.  Also, it’s located in a localhost for the postgreSQL database named ‘marche’, i.e. first, I created, with createdb the PostgreSQL database marche.  Then, I have to “call it” with the SQLAlchemy engine.  
 
-```python firms_by_NASDAQ.py```
+```
+python firms_by_NASDAQ.py
+```
 
 in its directory.  
 
@@ -55,13 +62,17 @@ The available SQLalchemy classes that map to tables are the following:
 
 Recall that 
 
-  ```session.query(Symbole).all()```
+  ```
+  session.query(Symbole).all()
+  ```
 
 gets all the (ticker) symbols, with no duplicates, as a Python list.  
 
 run 
 
-  ```python -i YHOOF_toSQL.py```
+  ```
+  python -i YHOOF_toSQL.py
+  ```
 
 and answer “yes” at the prompt to build the entire SQL database of historical prices for all available data from Yahoo! Finance for all firms (i.e. stocks, tickers, companies) in the NASDAQ, NYSE, AMEX, according to the NASDAQ website.
 
