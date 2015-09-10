@@ -99,5 +99,25 @@ python -i YHOOF_toSQL.py
 
 and answer “yes” at the prompt to build the entire SQL database of historical prices for all available data from Yahoo! Finance for all firms (i.e. stocks, tickers, companies) in the NASDAQ, NYSE, AMEX, according to the NASDAQ website.
 
+EY : 20150909
+TIPS:
+http://stackoverflow.com/questions/21439869/cant-drop-a-table-in-postgres
+One needs to be careful about how case-sensitive case-insensitivity is in psql
+So do something like this:
+DROP TABLE "quandl_source" CASCADE;
+For this to work.  
+
+http://stackoverflow.com/questions/11668355/sqlalchemy-get-model-from-table-name-this-may-imply-appending-some-function-to
+
+Base._decl_class_registry.values() (that will get you the “model” or the SQLalchemy class associated to each table, you get the object itself)
+
+############################################################################ 
+##### posts on wordpress.com and other places involving marche
+############################################################################ 
+
+<em>(in progress)</em>
+<h2>Is the U.S. S&amp;P 500 Price-to-Earnings (PE) multiple too rich right now?</h2>
+Take a look at the Price to Earnings Ratio, based upon an average of earnings over ten years, and the S&amp;P composite. Data is from the <a href="http://www.econ.yale.edu/~shiller/data/chapt26.xls">Yale S\
+chool of Economics</a>, namely Robert J. Shiller's <strong>Market Volatility</strong>, Chapter 26, which is updated on his website, and can easily be accessed through the <a href="https://www.quandl.com/data/YALE/SP_PER10Y-U-S-Stock-Price-Data-Price-Earnings-Ratio-Ten-Year-Earnings">Quandl website</a>, and can be databased locally using Python scripts in the github repository <a href="https://github.com/ernestyalumni/marche">marche</a>
 
 
