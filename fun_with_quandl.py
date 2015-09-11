@@ -64,6 +64,23 @@ SUBDIR = './rawdata/quandl/'
 Session = sessionmaker(bind=engine)
 session = Session()
 
+def get_local_pd(codename):
+    """
+    get_local_pd = get_local_pd(codename)
+    get a local file, which is a pickled panda DataFrame
+
+    INPUTS
+    str codename: Quandl Code name 
+
+    OUTPUTS
+    panda DataFrame: result
+    """
+
+    code_editted = codename.replace('/','__')
+    result = pandas.read_pickle(SUBDIR+code_editted)
+    return result
+
+
 #####################################################################################
 ##### Examples of USAGE
 #####################################################################################
@@ -162,3 +179,21 @@ plt.plot( yspper10y.index.to_pydatetime()[::2] , yspewcoeffs2[2] )
 plt.title("c_D1 Haar wavelet level 2 decomposition detail coefficient of "+yaleds[12].name, fontsize=12)
 plt.ylabel("c_D1")
 plt.grid(True)
+
+################################################################################ 
+### Housing
+################################################################################
+res2 = session.query(DataSet).all()
+res1 = get_local_pd( res2[6].code )
+
+fig = res1.plot().figure
+fig.suptitle( res2[6].name,fontsize=14,fontweight='bold')
+ax = fig.add_subplot(111)
+ax.set_ylabel( res2[6].colname.split(',')[1] )
+ax.set_xlabel( res2[6].colname.split(',')[0] )
+ax.text(ax.get_xlim()[0],180,"frequency: "+res2[6].freq , fontsize=10 )
+ax.text(ax.get_xlim()[0],175,"Quandl CODE: "+res2[6].code, fontsize=10)
+ax.text(ax.get_xlim()[0],170,"Source: " + res2[6].desc,style='italic', fontsize=10)
+ax.set_xticks( np.arange( ax.get_xlim()[0], ax.get_xlim()[1], (ax.get_xlim()[1] -ax.get_xlim()[0])/15 ))
+# see this stackexchange answer for set_xticks: 
+# cf. http://stackoverflow.com/questions/24943991/matplotlib-change-grid-interval-and-specify-tick-labels
